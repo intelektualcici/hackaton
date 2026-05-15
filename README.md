@@ -29,15 +29,14 @@ Dosad je napravljeno:
 - Anonymous Auth provider je omogućen.
 - Produkcijski test za anonymous auth + AI function poziv je prošao.
 - Lokalni Git repozitorij je inicijaliziran na branchu `main`.
-- Prvi commit sadrži starter projekt i README status.
-- Push na GitHub još čeka remote `origin`, jer lokalno nije bio postavljen GitHub repository.
+- GitHub remote `origin` je postavljen na `https://github.com/intelektualcici/hackaton.git`.
+- Projekt je pushan u private GitHub repository: `https://github.com/intelektualcici/hackaton`.
 
 Još treba napraviti ručno:
 
 - Otvoriti Android projekt iz točne putanje `android-app` u Android Studio.
 - U Android Studio koristiti Gradle wrapper iz projekta.
 - Pokrenuti Android app na emulatoru ili fizičkom uređaju i provjeriti login/displayName/AI flow.
-- Ako želiš push na GitHub, treba dodati GitHub remote ili instalirati/autorizirati GitHub CLI.
 
 ## Što projekt sadrži
 
