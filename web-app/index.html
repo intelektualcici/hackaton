@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="hr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hackaton</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel">
+        <div class="section-heading">
+          <p class="eyebrow">Firebase Auth</p>
+          <h1>Hackaton</h1>
+        </div>
+
+        <button id="loginButton" type="button">Anonymous login</button>
+        <p id="authStatus" class="muted">You are not signed in.</p>
+
+        <label for="uidOutput">UID</label>
+        <input id="uidOutput" type="text" readonly />
+
+        <label for="displayNameInput">Display name</label>
+        <div class="row">
+          <input id="displayNameInput" type="text" placeholder="Anonymous" />
+          <button id="saveProfileButton" type="button">Save</button>
+        </div>
+        <p id="profileStatus" class="muted"></p>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <p class="eyebrow">Firebase Functions</p>
+          <h2>AI request</h2>
+        </div>
+
+        <label for="promptInput">Prompt</label>
+        <textarea id="promptInput" maxlength="2000" placeholder="Write a short prompt"></textarea>
+        <button id="generateButton" type="button">Generate</button>
+        <p id="aiStatus" class="muted"></p>
+        <pre id="aiResponse"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

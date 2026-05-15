@@ -1,0 +1,46 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+.tools/
+*.swp
+
+# Environment and secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
+# Firebase local/project files
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+database-debug.log
+ui-debug.log
+
+# Android
+android-app/.gradle/
+android-app/local.properties
+android-app/**/build/
+android-app/captures/
+android-app/app/google-services.json
+android-app/**/*.jks
+android-app/**/*.keystore
+
+# Node / Vite / Functions
+web-app/node_modules/
+web-app/dist/
+functions/node_modules/
+functions/lib/
+functions/.runtimeconfig.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Firebase Functions local secrets
+**/.secret.local
