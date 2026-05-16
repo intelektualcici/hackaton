@@ -1,6 +1,6 @@
 # Hackaton / Visit Split
 
-Visit Split is a demo MVP one-page AI tourist planner for Split, Croatia. A user chooses time, budget, group type and interests, receives personalized recommendations from a local JSON database, selects the places they like, then generates a final itinerary only from those selected items.
+Visit Split is a demo MVP one-page AI tourist planner for Split, Croatia. A user chooses a date, time window, budget, group type and interests, receives personalized recommendations from a local JSON database, selects the places they like, then generates a final itinerary only from those selected items.
 
 ## Install
 
@@ -50,17 +50,17 @@ pnpm preview
 
 ## Fallback Mode
 
-The demo still works without `OPENAI_API_KEY` or if OpenAI is unavailable. Recommendation ranking falls back to local scoring based on interests, group type, budget and duration. Itinerary generation falls back to a simple timeline built from only the selected recommendations.
+The demo still works without `OPENAI_API_KEY` or if OpenAI is unavailable. Recommendation ranking falls back to local scoring based on interests, group type, budget, date/time window and duration. Itinerary generation falls back to a simple timeline built from only the selected recommendations.
 
 ## Demo Flow
 
 1. Hero: `Plan your perfect Split day in seconds.`
-2. Form: choose `3h`, `€0–50`, `Couple`, `History` and `Food`.
+2. Form: choose a date, `09:00–12:00`, `€0–50`, `Couple`, `History` and `Food`.
 3. Click `Find recommendations`.
 4. Review AI-ranked recommendation cards and Split map pins.
 5. Select 3–4 recommendations.
 6. Click `Create my plan with selected`.
-7. Reveal the visual timeline and final Visit Split brand moment.
+7. Reveal the visual timeline built inside the selected date/time window.
 
 ## Data And Image Credits
 

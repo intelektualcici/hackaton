@@ -1,10 +1,15 @@
-import type { PlannerCriteria, TimeOption } from "../types/planner";
+import type { PlannerCriteria } from "../types/planner";
 import type { Recommendation } from "../types/recommendation";
 
-export const timeToMinutes = (time: TimeOption): number => {
-  if (time === "1h") return 60;
-  if (time === "3h") return 180;
-  return 480;
+export const timeStringToMinutes = (time: string): number => {
+  const [hours = "0", minutes = "0"] = time.split(":");
+  return Number(hours) * 60 + Number(minutes);
+};
+
+export const getAvailableMinutes = (criteria: PlannerCriteria): number => {
+  const start = timeStringToMinutes(criteria.startTime);
+  const end = timeStringToMinutes(criteria.endTime);
+  return Math.max(0, end - start);
 };
 
 export const formatDuration = (minutes: number): string => {
@@ -20,11 +25,23 @@ export const formatPriceRange = (min: number, max: number): string => {
   return `€${min}–${max}`;
 };
 
+export const formatTimeWindow = (criteria: PlannerCriteria): string => {
+  if (!criteria.date) return `${criteria.startTime} - ${criteria.endTime}`;
+
+  const date = new Date(`${criteria.date}T00:00:00`);
+  const dateLabel = new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+
+  return `${dateLabel}, ${criteria.startTime} - ${criteria.endTime}`;
+};
+
 export const filterRecommendations = (
   recommendations: Recommendation[],
   criteria: PlannerCriteria,
 ): Recommendation[] => {
-  const availableMinutes = timeToMinutes(criteria.time);
+  const availableMinutes = getAvailableMinutes(criteria);
 
   return recommendations.filter((item) => {
     const budgetMatches =

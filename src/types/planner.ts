@@ -1,9 +1,9 @@
 import type { GroupType, Recommendation, RecommendationCategory } from "./recommendation";
 
-export type TimeOption = "1h" | "3h" | "Full day";
-
 export interface PlannerCriteria {
-  time: TimeOption;
+  date: string;
+  startTime: string;
+  endTime: string;
   budgetMin: number;
   budgetMax: number;
   group: GroupType;

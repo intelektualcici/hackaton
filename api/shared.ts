@@ -6,15 +6,27 @@ import { rankFallback } from "../src/utils/rankFallback";
 import type { PlannerCriteria, RankedRecommendation } from "../src/types/planner";
 import type { Recommendation } from "../src/types/recommendation";
 
-export const criteriaSchema = z.object({
-  time: z.enum(["1h", "3h", "Full day"]),
-  budgetMin: z.number().min(0),
-  budgetMax: z.number().min(0),
-  group: z.enum(["solo", "couple", "friends", "family"]),
-  interests: z.array(
-    z.enum(["food", "beaches", "history", "nightlife", "events", "nature"]),
-  ),
-});
+const timeToMinutes = (time: string): number => {
+  const [hours = "0", minutes = "0"] = time.split(":");
+  return Number(hours) * 60 + Number(minutes);
+};
+
+export const criteriaSchema = z
+  .object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/),
+    endTime: z.string().regex(/^\d{2}:\d{2}$/),
+    budgetMin: z.number().min(0),
+    budgetMax: z.number().min(0),
+    group: z.enum(["solo", "couple", "friends", "family"]),
+    interests: z.array(
+      z.enum(["food", "beaches", "history", "nightlife", "events", "nature"]),
+    ),
+  })
+  .refine((criteria) => timeToMinutes(criteria.endTime) > timeToMinutes(criteria.startTime), {
+    message: "End time must be after start time.",
+    path: ["endTime"],
+  });
 
 export const selectedRecommendationSchema = z.object({
   id: z.string(),

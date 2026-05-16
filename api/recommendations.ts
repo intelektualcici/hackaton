@@ -28,7 +28,7 @@ export const createRecommendationRankings = async (
         {
           role: "system",
           content:
-            "You are an AI travel assistant for Split, Croatia. Use only the provided local database items. Do not invent new locations, events or prices. Rank the best matches for the user's criteria. Return JSON only.",
+            "You are an AI travel assistant for Split, Croatia. Use only the provided local database items. Do not invent new locations, events or prices. Rank the best matches for the user's date, time window, budget, group type and interests. Return JSON only.",
         },
         {
           role: "user",

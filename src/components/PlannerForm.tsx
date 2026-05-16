@@ -1,8 +1,15 @@
-import { Clock3, Euro, Search, Tags, UsersRound } from "lucide-react";
+import {
+  CalendarDays,
+  Clock3,
+  Euro,
+  Search,
+  Tags,
+  UsersRound,
+} from "lucide-react";
 import { motion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
-import type { PlannerCriteria, TimeOption } from "../types/planner";
+import type { PlannerCriteria } from "../types/planner";
 import type { GroupType, RecommendationCategory } from "../types/recommendation";
 import { categoryMeta } from "../types/recommendation";
 
@@ -11,7 +18,6 @@ interface PlannerFormProps {
   onSubmit: (criteria: PlannerCriteria) => void;
 }
 
-const timeOptions: TimeOption[] = ["1h", "3h", "Full day"];
 const groupOptions: { value: GroupType; label: string }[] = [
   { value: "solo", label: "Solo" },
   { value: "couple", label: "Couple" },
@@ -30,6 +36,12 @@ const interestOptions: RecommendationCategory[] = [
 const chipBase =
   "rounded-lg border px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-sea-500/20";
 
+const getTodayInputValue = () => {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 10);
+};
+
 const FieldLabel = ({
   icon: Icon,
   children,
@@ -46,7 +58,9 @@ const FieldLabel = ({
 );
 
 const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
-  const [time, setTime] = useState<TimeOption | "">("");
+  const [date, setDate] = useState(getTodayInputValue);
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("12:00");
   const [budgetMin, setBudgetMin] = useState(0);
   const [budgetMax, setBudgetMax] = useState(50);
   const [group, setGroup] = useState<GroupType | "">("");
@@ -60,7 +74,15 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
     );
   };
 
-  const canSubmit = Boolean(time && group && interests.length > 0 && budgetMax >= budgetMin);
+  const canSubmit = Boolean(
+    date &&
+      startTime &&
+      endTime &&
+      endTime > startTime &&
+      group &&
+      interests.length > 0 &&
+      budgetMax >= budgetMin,
+  );
 
   return (
     <section id="planner-form" className="min-h-screen bg-sand-50 px-5 py-20 sm:px-8 lg:px-12">
@@ -78,9 +100,9 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           </h2>
           <div className="max-w-3xl lg:justify-self-end">
             <p className="text-base leading-8 text-sand-50/90 sm:text-lg">
-              Tell us your time, budget and interests — Visit Split recommends
-              places, events and experiences, then turns your picks into a
-              personalized plan.
+              Tell us your date, time window, budget and interests — Visit
+              Split recommends places, events and experiences, then turns your
+              picks into a personalized plan.
             </p>
             <a
               href="#planner-fields"
@@ -102,27 +124,57 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           className="mx-auto grid w-full max-w-5xl scroll-mt-28 gap-7 rounded-lg bg-sand-100 p-5 shadow-card sm:p-8"
           onSubmit={(event) => {
             event.preventDefault();
-            if (!canSubmit || !time || !group) return;
-            onSubmit({ time, budgetMin, budgetMax, group, interests });
+            if (!canSubmit || !group) return;
+            onSubmit({
+              date,
+              startTime,
+              endTime,
+              budgetMin,
+              budgetMax,
+              group,
+              interests,
+            });
           }}
         >
           <div>
-            <FieldLabel icon={Clock3}>Time available</FieldLabel>
-            <div className="flex flex-wrap gap-3">
-              {timeOptions.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setTime(option)}
-                  className={`${chipBase} ${
-                    time === option
-                      ? "border-sea-500 bg-sea-500 text-sand-50"
-                      : "border-navy-900/10 bg-sand-50 text-navy-800 hover:border-sea-500/40"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
+            <FieldLabel icon={CalendarDays}>Date and time</FieldLabel>
+            <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
+              <label className="flex max-w-[280px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+                <CalendarDays className="h-5 w-5 text-sea-600" aria-hidden="true" />
+                <span className="text-sm font-bold text-navy-700">Date</span>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(event) => setDate(event.target.value)}
+                  onInput={(event) => setDate(event.currentTarget.value)}
+                  className="w-36 bg-transparent text-right text-base font-extrabold text-navy-900 outline-none"
+                  aria-label="Plan date"
+                />
+              </label>
+              <label className="flex max-w-[220px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+                <Clock3 className="h-5 w-5 text-sea-600" aria-hidden="true" />
+                <span className="text-sm font-bold text-navy-700">From</span>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(event) => setStartTime(event.target.value)}
+                  onInput={(event) => setStartTime(event.currentTarget.value)}
+                  className="w-24 bg-transparent text-right text-base font-extrabold text-navy-900 outline-none"
+                  aria-label="Plan start time"
+                />
+              </label>
+              <label className="flex max-w-[220px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+                <Clock3 className="h-5 w-5 text-sea-600" aria-hidden="true" />
+                <span className="text-sm font-bold text-navy-700">To</span>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(event) => setEndTime(event.target.value)}
+                  onInput={(event) => setEndTime(event.currentTarget.value)}
+                  className="w-24 bg-transparent text-right text-base font-extrabold text-navy-900 outline-none"
+                  aria-label="Plan end time"
+                />
+              </label>
             </div>
           </div>
 

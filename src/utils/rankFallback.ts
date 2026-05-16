@@ -5,15 +5,42 @@ import type {
   SelectedRecommendation,
 } from "../types/planner";
 import type { Recommendation } from "../types/recommendation";
-import { timeToMinutes } from "./filterRecommendations";
+import {
+  formatTimeWindow,
+  getAvailableMinutes,
+  timeStringToMinutes,
+} from "./filterRecommendations";
 
 const cityCenterTags = new Set(["city-center", "walkable", "old-town", "riva"]);
+
+const getTimeOfDayBoost = (
+  item: Recommendation,
+  criteria: PlannerCriteria,
+): number => {
+  const start = timeStringToMinutes(criteria.startTime);
+
+  if (start >= 18 * 60) {
+    if (item.category === "nightlife" || item.category === "events") return 14;
+    if (item.category === "food") return 8;
+    return 0;
+  }
+
+  if (start >= 12 * 60) {
+    if (item.category === "beaches" || item.category === "nature") return 10;
+    if (item.category === "food") return 6;
+    return 0;
+  }
+
+  if (item.category === "history" || item.category === "nature") return 8;
+  if (item.category === "food") return 4;
+  return 0;
+};
 
 export const rankFallback = (
   recommendations: Recommendation[],
   criteria: PlannerCriteria,
 ): RankedRecommendation[] => {
-  const availableMinutes = timeToMinutes(criteria.time);
+  const availableMinutes = getAvailableMinutes(criteria);
 
   return recommendations
     .map((item) => {
@@ -31,15 +58,22 @@ export const rankFallback = (
           ? Math.max(4, 16 - Math.floor(item.durationMinutes / 30))
           : 0;
       const interestBoost = interestHits * 20;
+      const timeOfDayBoost = getTimeOfDayBoost(item, criteria);
 
       return {
         id: item.id,
         score: Math.min(
           99,
-          38 + interestBoost + groupBoost + budgetBoost + durationBoost + tagBoost,
+          38 +
+            interestBoost +
+            groupBoost +
+            budgetBoost +
+            durationBoost +
+            tagBoost +
+            timeOfDayBoost,
         ),
         reason:
-          "This matches your selected interests, budget and group type.",
+          "This matches your selected interests, budget, group type and time window.",
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -47,9 +81,10 @@ export const rankFallback = (
 
 const minutesToRange = (start: number, duration: number): string => {
   const format = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
+    const normalized = minutes % (24 * 60);
+    const hours = Math.floor(normalized / 60);
     const mins = minutes % 60;
-    return `${hours}:${String(mins).padStart(2, "0")}`;
+    return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
   };
 
   return `${format(start)} - ${format(start + duration)}`;
@@ -66,14 +101,15 @@ const fallbackSummary = (criteria: PlannerCriteria): string => {
           ? "two"
           : "solo traveler";
 
-  return `A walkable ${criteria.time} Split plan for ${groupLabel}, tuned around ${interests || "local highlights"}.`;
+  return `A walkable ${formatTimeWindow(criteria)} Split plan for ${groupLabel}, tuned around ${interests || "local highlights"}.`;
 };
 
 export const createFallbackPlan = (
   criteria: PlannerCriteria,
   selectedRecommendations: SelectedRecommendation[],
 ): ItineraryPlan => {
-  const maxMinutes = timeToMinutes(criteria.time);
+  const maxMinutes = getAvailableMinutes(criteria);
+  const startMinutes = timeStringToMinutes(criteria.startTime);
   const totalSelectedMinutes = selectedRecommendations.reduce(
     (sum, item) => sum + item.durationMinutes,
     0,
@@ -91,7 +127,7 @@ export const createFallbackPlan = (
       index === selectedRecommendations.length - 1
         ? Math.max(20, maxMinutes - elapsed)
         : Math.min(suggestedDuration, Math.max(20, maxMinutes - elapsed - 20));
-    const time = minutesToRange(elapsed, duration);
+    const time = minutesToRange(startMinutes + elapsed, duration);
     elapsed += duration;
 
     return {
@@ -115,7 +151,7 @@ export const createFallbackPlan = (
           : "solo";
 
   return {
-    title: `A relaxed ${criteria.time} Split plan ${groupLabel}`,
+    title: `A relaxed ${formatTimeWindow(criteria)} Split plan ${groupLabel}`,
     summary: fallbackSummary(criteria),
     timeline,
     source: "fallback",
