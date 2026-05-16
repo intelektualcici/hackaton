@@ -31,9 +31,10 @@ Then add:
 
 ```bash
 OPENAI_API_KEY=your_real_key_here
+OPENAI_MODEL=gpt-5.4-mini
 ```
 
-The key is read only by the backend API routes. It is never exposed in frontend code.
+The key and model are read only by the backend API routes. The default OpenAI model is `gpt-5.4-mini`, and the API key is never exposed in frontend code.
 
 ## Build
 
