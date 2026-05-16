@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #102033;
+  background: #fffaf1;
+  font-family: "Inter", system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(14, 143, 180, 0.09), transparent 36rem),
+    linear-gradient(180deg, #fffaf1 0%, #f8edda 52%, #fffaf1 100%);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.leaflet-container {
+  min-height: 520px;
+  width: 100%;
+  border-radius: 8px;
+  background: #d7eef2;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.visit-split-marker {
+  background: transparent;
+  border: 0;
+}
+
+.visit-split-marker span {
+  align-items: center;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 14px 28px rgba(16, 32, 51, 0.22);
+  color: #102033;
+  display: flex;
+  justify-content: center;
+  transition:
+    height 180ms ease,
+    width 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(16, 32, 51, 0.2);
+}
+
+.leaflet-popup-content {
+  margin: 16px;
+}
+
+.visit-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.visit-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(14, 143, 180, 0.28);
+  border-radius: 999px;
+}
