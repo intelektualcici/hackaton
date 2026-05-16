@@ -8,6 +8,7 @@ export interface PlannerCriteria {
   budgetMax: number;
   group: GroupType;
   interests: RecommendationCategory[];
+  additionalDetails?: string;
 }
 
 export interface RankedRecommendation {
@@ -28,7 +29,6 @@ export interface SelectedRecommendation {
   lat: Recommendation["lat"];
   lng: Recommendation["lng"];
   durationMinutes: Recommendation["durationMinutes"];
-  googleMapsUrl?: Recommendation["googleMapsUrl"];
   category: Recommendation["category"];
   address: Recommendation["address"];
   priceMin: Recommendation["priceMin"];

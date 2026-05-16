@@ -2,7 +2,7 @@ import {
   CalendarDays,
   Clock3,
   Euro,
-  Search,
+  MessageSquareText,
   Tags,
   UsersRound,
 } from "lucide-react";
@@ -65,6 +65,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
   const [budgetMax, setBudgetMax] = useState(50);
   const [group, setGroup] = useState<GroupType | "">("");
   const [interests, setInterests] = useState<RecommendationCategory[]>([]);
+  const [additionalDetails, setAdditionalDetails] = useState("");
 
   const toggleInterest = (interest: RecommendationCategory) => {
     setInterests((current) =>
@@ -133,6 +134,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
               budgetMax,
               group,
               interests,
+              additionalDetails: additionalDetails.trim() || undefined,
             });
           }}
         >
@@ -252,13 +254,24 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
             </div>
           </div>
 
+          <div>
+            <FieldLabel icon={MessageSquareText}>Additional details:</FieldLabel>
+            <textarea
+              value={additionalDetails}
+              onChange={(event) => setAdditionalDetails(event.target.value)}
+              rows={4}
+              className="w-full max-w-3xl resize-none rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3 text-base font-semibold leading-7 text-navy-900 outline-none transition placeholder:text-navy-700/55 focus:border-sea-500 focus:ring-4 focus:ring-sea-500/20"
+              placeholder="Example: I want to visit the main historic sights and have lunch nearby. Plan the rest of the day around that."
+              aria-label="Additional planning details"
+            />
+          </div>
+
           <button
             type="submit"
             disabled={!canSubmit || isLoading}
             className="inline-flex items-center justify-center gap-3 justify-self-start rounded-lg bg-navy-900 px-5 py-3 text-sm font-extrabold text-sand-50 shadow-card transition hover:-translate-y-0.5 hover:bg-navy-800 focus:outline-none focus:ring-4 focus:ring-navy-900/20 disabled:cursor-not-allowed disabled:opacity-55"
           >
-            <Search className="h-5 w-5" aria-hidden="true" />
-            {isLoading ? "Finding recommendations..." : "Find recommendations"}
+            {isLoading ? "Creating your personalized Split plan..." : "Create plan"}
           </button>
         </form>
       </motion.div>

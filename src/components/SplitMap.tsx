@@ -1,5 +1,4 @@
 import L from "leaflet";
-import { ExternalLink } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import type { DisplayRecommendation } from "../types/planner";
@@ -86,15 +85,14 @@ const MarkerLayer = ({
                   </span>
                   <span>{recommendation.address}</span>
                 </div>
-                <a
-                  href={recommendation.googleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg bg-sea-600 px-3 py-2 text-xs font-extrabold text-sand-50"
-                >
-                  Open in Google Maps
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
+                <div className="mt-3 rounded-lg bg-sea-50 p-3">
+                  <p className="text-xs font-extrabold uppercase text-sea-700">
+                    Why this fits
+                  </p>
+                  <p className="mt-1 text-xs font-semibold leading-5 text-navy-700">
+                    {item.reason}
+                  </p>
+                </div>
               </div>
             </Popup>
           </Marker>

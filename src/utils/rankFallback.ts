@@ -36,6 +36,25 @@ const getTimeOfDayBoost = (
   return 0;
 };
 
+const getAdditionalDetailsBoost = (
+  item: Recommendation,
+  criteria: PlannerCriteria,
+): number => {
+  const details = criteria.additionalDetails?.toLowerCase() ?? "";
+  if (!details) return 0;
+
+  const categoryHints: Record<Recommendation["category"], string[]> = {
+    food: ["food", "lunch", "dinner", "restaurant", "eat", "ručak", "rucak", "večera", "vecera"],
+    beaches: ["beach", "swim", "sea", "plaža", "plaza", "more", "kupanje"],
+    history: ["history", "historic", "old town", "palace", "povijest", "povijes", "znamenit"],
+    nightlife: ["night", "bar", "drink", "cocktail", "party", "noć", "noc", "izlazak"],
+    events: ["event", "music", "concert", "show", "theatre", "događaj", "dogadaj", "koncert"],
+    nature: ["nature", "walk", "view", "sunset", "park", "priroda", "šetnja", "setnja"],
+  };
+
+  return categoryHints[item.category].some((hint) => details.includes(hint)) ? 12 : 0;
+};
+
 export const rankFallback = (
   recommendations: Recommendation[],
   criteria: PlannerCriteria,
@@ -59,6 +78,7 @@ export const rankFallback = (
           : 0;
       const interestBoost = interestHits * 20;
       const timeOfDayBoost = getTimeOfDayBoost(item, criteria);
+      const additionalDetailsBoost = getAdditionalDetailsBoost(item, criteria);
 
       return {
         id: item.id,
@@ -70,7 +90,8 @@ export const rankFallback = (
             budgetBoost +
             durationBoost +
             tagBoost +
-            timeOfDayBoost,
+            timeOfDayBoost +
+            additionalDetailsBoost,
         ),
         reason:
           "This matches your selected interests, budget, group type and time window.",
@@ -92,6 +113,9 @@ const minutesToRange = (start: number, duration: number): string => {
 
 const fallbackSummary = (criteria: PlannerCriteria): string => {
   const interests = criteria.interests.join(", ");
+  const details = criteria.additionalDetails
+    ? ` Extra guidance: ${criteria.additionalDetails}`
+    : "";
   const groupLabel =
     criteria.group === "family"
       ? "family"
@@ -101,7 +125,7 @@ const fallbackSummary = (criteria: PlannerCriteria): string => {
           ? "two"
           : "solo traveler";
 
-  return `A walkable ${formatTimeWindow(criteria)} Split plan for ${groupLabel}, tuned around ${interests || "local highlights"}.`;
+  return `A walkable ${formatTimeWindow(criteria)} Split plan for ${groupLabel}, tuned around ${interests || "local highlights"}.${details}`;
 };
 
 export const createFallbackPlan = (

@@ -22,6 +22,7 @@ export const criteriaSchema = z
     interests: z.array(
       z.enum(["food", "beaches", "history", "nightlife", "events", "nature"]),
     ),
+    additionalDetails: z.string().max(1200).optional(),
   })
   .refine((criteria) => timeToMinutes(criteria.endTime) > timeToMinutes(criteria.startTime), {
     message: "End time must be after start time.",
@@ -34,7 +35,6 @@ export const selectedRecommendationSchema = z.object({
   lat: z.number(),
   lng: z.number(),
   durationMinutes: z.number().positive(),
-  googleMapsUrl: z.string().optional(),
   category: z.enum(["food", "beaches", "history", "nightlife", "events", "nature"]),
   address: z.string(),
   priceMin: z.number().min(0),

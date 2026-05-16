@@ -1,6 +1,6 @@
 # Hackaton / Visit Split
 
-Visit Split is a demo MVP one-page AI tourist planner for Split, Croatia. A user chooses a date, time window, budget, group type and interests, receives personalized recommendations from a local JSON database, selects the places they like, then generates a final itinerary only from those selected items.
+Visit Split is a demo MVP one-page AI tourist planner for Split, Croatia. A user chooses a date, time window, budget, group type, interests and optional extra planning details, then receives a generated itinerary from a local JSON recommendation database.
 
 ## Install
 
@@ -50,18 +50,16 @@ pnpm preview
 
 ## Fallback Mode
 
-The demo still works without `OPENAI_API_KEY` or if OpenAI is unavailable. Recommendation ranking falls back to local scoring based on interests, group type, budget, date/time window and duration. Itinerary generation falls back to a simple timeline built from only the selected recommendations.
+The demo still works without `OPENAI_API_KEY` or if OpenAI is unavailable. Recommendation ranking falls back to local scoring based on interests, group type, budget, date/time window, additional details and duration. Itinerary generation falls back to a simple timeline built from ranked local recommendations.
 
 ## Demo Flow
 
 1. Hero: `Plan your perfect Split day in seconds.`
-2. Form: choose a date, `09:00–12:00`, `€0–50`, `Couple`, `History` and `Food`.
-3. Click `Find recommendations`.
-4. Review AI-ranked recommendation cards and Split map pins.
-5. Select 3–4 recommendations.
-6. Click `Create my plan with selected`.
-7. Reveal the visual timeline built inside the selected date/time window.
+2. Form: choose a date, `09:00–12:00`, `€0–50`, `Couple`, `History`, `Food`, and optionally add extra planning details.
+3. Click `Create plan`.
+4. Reveal the generated plan with a map on the left and chronological recommendations on the right.
+5. Hover timeline items to focus the matching map marker.
 
 ## Data And Image Credits
 
-Recommendations are stored locally in `src/data/recommendations.json` for demo use. The hero uses [Split - Riva 002.jpg](https://commons.wikimedia.org/wiki/File:Split_-_Riva_002.jpg) by JoJan, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), via Wikimedia Commons `Special:Redirect`.
+Recommendations are stored locally in `src/data/recommendations.json` for demo use. The hero uses a local Split panorama video asset in `public/videos/`.

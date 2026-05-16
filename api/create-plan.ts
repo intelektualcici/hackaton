@@ -67,7 +67,7 @@ export const createItineraryPlan = async (
         {
           role: "system",
           content:
-            "You are an AI itinerary planner for Split, Croatia. Create a realistic itinerary using only the selected recommendations. Respect the user's selected date, start time, end time, budget, group type and interests. Order the recommendations logically. Do not add locations that are not selected. Return JSON only.",
+            "You are an AI itinerary planner for Split, Croatia. Create a realistic itinerary using only the selected recommendations. Respect the user's selected date, start time, end time, budget, group type, interests and optional additional details. Additional details should guide the tone and priorities, but do not add locations that are not selected. Order the recommendations logically. Return JSON only.",
         },
         {
           role: "user",

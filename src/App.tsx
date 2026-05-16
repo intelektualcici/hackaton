@@ -1,9 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Hero from "./components/Hero";
 import LoadingState from "./components/LoadingState";
 import PlannerForm from "./components/PlannerForm";
 import PlanTimeline from "./components/PlanTimeline";
-import RecommendationsSection from "./components/RecommendationsSection";
 import recommendationsJson from "./data/recommendations.json";
 import type {
   DisplayRecommendation,
@@ -14,7 +13,10 @@ import type {
   SelectedRecommendation,
 } from "./types/planner";
 import type { Recommendation } from "./types/recommendation";
-import { filterRecommendations } from "./utils/filterRecommendations";
+import {
+  filterRecommendations,
+  getAvailableMinutes,
+} from "./utils/filterRecommendations";
 import { createFallbackPlan, rankFallback } from "./utils/rankFallback";
 
 const allRecommendations = recommendationsJson as Recommendation[];
@@ -71,94 +73,101 @@ const requestPlan = async (
   return (await response.json()) as ItineraryPlan;
 };
 
+const toSelectedRecommendation = (
+  recommendation: Recommendation,
+): SelectedRecommendation => ({
+  id: recommendation.id,
+  title: recommendation.title,
+  lat: recommendation.lat,
+  lng: recommendation.lng,
+  durationMinutes: recommendation.durationMinutes,
+  category: recommendation.category,
+  address: recommendation.address,
+  priceMin: recommendation.priceMin,
+  priceMax: recommendation.priceMax,
+});
+
+const choosePlanRecommendations = (
+  items: DisplayRecommendation[],
+  criteria: PlannerCriteria,
+): DisplayRecommendation[] => {
+  const availableMinutes = getAvailableMinutes(criteria);
+  const selected: DisplayRecommendation[] = [];
+  let usedMinutes = 0;
+
+  for (const item of items) {
+    if (selected.length >= 5) break;
+
+    const nextDuration = item.recommendation.durationMinutes;
+    const fitsWindow = usedMinutes + nextDuration <= availableMinutes;
+    const needsMinimumPlan = selected.length < 2 && nextDuration <= availableMinutes;
+
+    if (fitsWindow || needsMinimumPlan) {
+      selected.push(item);
+      usedMinutes += nextDuration;
+    }
+
+    if (selected.length >= 2 && usedMinutes >= availableMinutes * 0.82) break;
+  }
+
+  return selected.length > 0 ? selected : items.slice(0, 3);
+};
+
 const App = () => {
-  const formRef = useRef<HTMLDivElement | null>(null);
-  const recommendationsRef = useRef<HTMLDivElement | null>(null);
   const planRef = useRef<HTMLDivElement | null>(null);
 
-  const [criteria, setCriteria] = useState<PlannerCriteria | null>(null);
-  const [displayRecommendations, setDisplayRecommendations] = useState<
+  const [planRecommendations, setPlanRecommendations] = useState<
     DisplayRecommendation[]
   >([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedRecommendations, setSelectedRecommendations] = useState<
+    SelectedRecommendation[]
+  >([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [plan, setPlan] = useState<ItineraryPlan | null>(null);
-  const [isFinding, setIsFinding] = useState(false);
   const [isCreatingPlan, setIsCreatingPlan] = useState(false);
 
-  const selectedRecommendations = useMemo<SelectedRecommendation[]>(() => {
-    return displayRecommendations
-      .filter((item) => selectedIds.has(item.recommendation.id))
-      .map(({ recommendation }) => ({
-        id: recommendation.id,
-        title: recommendation.title,
-        lat: recommendation.lat,
-        lng: recommendation.lng,
-        durationMinutes: recommendation.durationMinutes,
-        googleMapsUrl: recommendation.googleMapsUrl,
-        category: recommendation.category,
-        address: recommendation.address,
-        priceMin: recommendation.priceMin,
-        priceMax: recommendation.priceMax,
-      }));
-  }, [displayRecommendations, selectedIds]);
-
-  const handleFindRecommendations = async (nextCriteria: PlannerCriteria) => {
-    setCriteria(nextCriteria);
-    setIsFinding(true);
+  const handleCreatePlanFromCriteria = async (nextCriteria: PlannerCriteria) => {
+    setIsCreatingPlan(true);
     setPlan(null);
-    setSelectedIds(new Set());
+    setPlanRecommendations([]);
+    setSelectedRecommendations([]);
     setActiveId(null);
 
     const locallyFiltered = filterRecommendations(allRecommendations, nextCriteria);
     const source = locallyFiltered.length > 0 ? locallyFiltered : allRecommendations;
 
+    let rankedRecommendations: DisplayRecommendation[];
+
     try {
       const result = await requestRecommendations(nextCriteria);
       const joined = joinRankings(result.recommendations, allRecommendations);
-      setDisplayRecommendations(
+      rankedRecommendations =
         joined.length > 0
           ? joined
-          : joinRankings(rankFallback(source, nextCriteria).slice(0, 12), source),
-      );
+          : joinRankings(rankFallback(source, nextCriteria).slice(0, 12), source);
     } catch {
-      setDisplayRecommendations(
-        joinRankings(rankFallback(source, nextCriteria).slice(0, 12), source),
+      rankedRecommendations = joinRankings(
+        rankFallback(source, nextCriteria).slice(0, 12),
+        source,
       );
-    } finally {
-      setIsFinding(false);
-      window.setTimeout(() => {
-        recommendationsRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 120);
     }
-  };
 
-  const handleToggleRecommendation = (id: string) => {
-    setSelectedIds((current) => {
-      const next = new Set(current);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
+    const chosenRecommendations = choosePlanRecommendations(
+      rankedRecommendations,
+      nextCriteria,
+    );
+    const selected = chosenRecommendations.map(({ recommendation }) =>
+      toSelectedRecommendation(recommendation),
+    );
 
-  const handleCreatePlan = async () => {
-    if (!criteria || selectedRecommendations.length === 0) return;
-
-    setIsCreatingPlan(true);
-    setPlan(null);
+    setPlanRecommendations(chosenRecommendations);
+    setSelectedRecommendations(selected);
 
     try {
-      const result = await requestPlan(criteria, selectedRecommendations);
+      const result = await requestPlan(nextCriteria, selected);
       setPlan(result);
     } catch {
-      setPlan(createFallbackPlan(criteria, selectedRecommendations));
+      setPlan(createFallbackPlan(nextCriteria, selected));
     } finally {
       setIsCreatingPlan(false);
       window.setTimeout(() => {
@@ -179,26 +188,10 @@ const App = () => {
 
       <Hero />
 
-      <div ref={formRef}>
-        <PlannerForm
-          isLoading={isFinding}
-          onSubmit={handleFindRecommendations}
-        />
-      </div>
-
-      <div ref={recommendationsRef}>
-        <RecommendationsSection
-          items={displayRecommendations}
-          selectedIds={selectedIds}
-          activeId={activeId}
-          isLoading={isFinding}
-          isCreatingPlan={isCreatingPlan}
-          onToggle={handleToggleRecommendation}
-          onFocus={setActiveId}
-          onHover={setActiveId}
-          onCreatePlan={handleCreatePlan}
-        />
-      </div>
+      <PlannerForm
+        isLoading={isCreatingPlan}
+        onSubmit={handleCreatePlanFromCriteria}
+      />
 
       {isCreatingPlan && (
         <section className="px-5 py-6 sm:px-8 lg:px-12">
@@ -211,7 +204,11 @@ const App = () => {
       <div ref={planRef}>
         <PlanTimeline
           plan={plan}
+          items={planRecommendations}
           selectedRecommendations={selectedRecommendations}
+          activeId={activeId}
+          onFocus={setActiveId}
+          onHover={setActiveId}
         />
       </div>
     </main>
