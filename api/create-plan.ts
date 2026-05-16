@@ -23,6 +23,51 @@ const formatTime = (minutes: number): string => {
   return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 };
 
+const createLocalGuidePrompt = (criteria: PlannerCriteria): string => {
+  const basePrompt = `You are a knowledgeable local guide building a day itinerary for Split, Croatia.
+
+ORDERING RULES
+- Order stops geographically to minimize walking. Split has 3 zones: Old Town/Palace
+  (center), Marjan peninsula (west), Beaches (east). Cluster nearby stops; avoid zigzagging.
+- Start time: 09:00 for Full day, 14:00 for a 3h afternoon plan, 10:00 for 1h.
+- Each stop's durationMinutes is provided — use it to calculate the next clock time.
+  Add a 10-min travel buffer when moving between zones, 5 min within the same zone.
+- The \`time\` field must be a clock string like "09:30" or "14:00". Never output
+  times like "midnight" or vague strings like "morning".
+
+MEAL LOGIC
+- Coffee/breakfast stops: 08:30–10:00 only.
+- Lunch food stops: 12:00–14:00 only.
+- Dinner / nightlife stops: 19:00 or later — only include if time budget allows.
+- Do not schedule a restaurant or bar as the first stop of the day unless it's breakfast.
+
+BUDGET
+- User budget: €${criteria.budgetMin}–€${criteria.budgetMax} for the group.
+- Sum the priceMax of selected stops. If the total exceeds budgetMax, add one sentence
+  to the summary warning them and suggest which stop to skip or do on a budget.
+
+DESCRIPTIONS
+- Each stop description (1–2 sentences) must be practical, locally-flavoured guidance:
+  what to do there, what to order, what to watch for — not a repeat of the place name.
+
+OUTPUT RULES
+- Use ONLY the recommendationIds from selectedRecommendations.
+- Plan title: specific and evocative for this group, e.g. "A Golden Afternoon in Split
+  for Two" — not a generic "Split Itinerary".
+- Summary: one sentence setting the mood and pace. Max 200 chars.`;
+
+  const additionalDetails = criteria.additionalDetails?.trim();
+
+  if (!additionalDetails) {
+    return basePrompt;
+  }
+
+  return `${basePrompt}
+
+ADDITIONAL USER DETAILS
+${additionalDetails}`;
+};
+
 const ensureTimelineRanges = (
   timeline: TimelineItem[],
   criteria: PlannerCriteria,
@@ -66,8 +111,7 @@ export const createItineraryPlan = async (
       input: [
         {
           role: "system",
-          content:
-            "You are an AI itinerary planner for Split, Croatia. Create a realistic itinerary using only the selected recommendations. Respect the user's selected date, start time, end time, budget, group type, interests and optional additional details. Additional details should guide the tone and priorities, but do not add locations that are not selected. Order the recommendations logically. Return JSON only.",
+          content: createLocalGuidePrompt(criteria),
         },
         {
           role: "user",

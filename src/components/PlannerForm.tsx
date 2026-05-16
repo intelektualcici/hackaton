@@ -1,6 +1,5 @@
 import {
   CalendarDays,
-  Clock3,
   Euro,
   MessageSquareText,
   Tags,
@@ -36,10 +35,24 @@ const interestOptions: RecommendationCategory[] = [
 const chipBase =
   "rounded-lg border px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-sea-500/20";
 
+const hourOptions = Array.from({ length: 17 }, (_, index) => {
+  const hour = index + 7;
+  return {
+    label: `${String(hour).padStart(2, "0")} h`,
+    value: `${String(hour).padStart(2, "0")}:00`,
+  };
+});
+
 const getTodayInputValue = () => {
   const date = new Date();
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
   return date.toISOString().slice(0, 10);
+};
+
+const nextHourValue = (value: string) => {
+  const currentIndex = hourOptions.findIndex((option) => option.value === value);
+  const nextIndex = Math.min(hourOptions.length - 1, Math.max(0, currentIndex + 1));
+  return hourOptions[nextIndex].value;
 };
 
 const FieldLabel = ({
@@ -66,6 +79,13 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
   const [group, setGroup] = useState<GroupType | "">("");
   const [interests, setInterests] = useState<RecommendationCategory[]>([]);
   const [additionalDetails, setAdditionalDetails] = useState("");
+
+  const handleStartTimeChange = (nextStartTime: string) => {
+    setStartTime(nextStartTime);
+    if (endTime <= nextStartTime) {
+      setEndTime(nextHourValue(nextStartTime));
+    }
+  };
 
   const toggleInterest = (interest: RecommendationCategory) => {
     setInterests((current) =>
@@ -140,42 +160,57 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
         >
           <div>
             <FieldLabel icon={CalendarDays}>Date and time</FieldLabel>
-            <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
-              <label className="flex max-w-[280px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
-                <CalendarDays className="h-5 w-5 text-sea-600" aria-hidden="true" />
-                <span className="text-sm font-bold text-navy-700">Date</span>
+            <div className="grid max-w-2xl gap-3 sm:grid-cols-[1.4fr_0.8fr_0.8fr]">
+              <label className="grid max-w-[280px] gap-1 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+                <span className="text-xs font-extrabold uppercase tracking-wide text-navy-700">
+                  Date
+                </span>
                 <input
                   type="date"
                   value={date}
                   onChange={(event) => setDate(event.target.value)}
                   onInput={(event) => setDate(event.currentTarget.value)}
-                  className="w-36 bg-transparent text-right text-base font-extrabold text-navy-900 outline-none"
+                  className="w-full bg-transparent text-base font-extrabold text-navy-900 outline-none"
                   aria-label="Plan date"
                 />
               </label>
-              <label className="flex max-w-[220px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
-                <Clock3 className="h-5 w-5 text-sea-600" aria-hidden="true" />
-                <span className="text-sm font-bold text-navy-700">From</span>
-                <input
-                  type="time"
+              <label className="grid max-w-[160px] gap-1 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+                <span className="text-xs font-extrabold uppercase tracking-wide text-navy-700">
+                  From
+                </span>
+                <select
                   value={startTime}
-                  onChange={(event) => setStartTime(event.target.value)}
-                  onInput={(event) => setStartTime(event.currentTarget.value)}
-                  className="w-24 bg-transparent text-right text-base font-extrabold text-navy-900 outline-none"
+                  onChange={(event) => handleStartTimeChange(event.target.value)}
+                  className="w-full appearance-none bg-transparent text-base font-extrabold text-navy-900 outline-none"
                   aria-label="Plan start time"
-                />
+                >
+                  {hourOptions.slice(0, -1).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </label>
-              <label className="flex max-w-[220px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
-                <Clock3 className="h-5 w-5 text-sea-600" aria-hidden="true" />
-                <span className="text-sm font-bold text-navy-700">To</span>
-                <input
-                  type="time"
+              <label className="grid max-w-[160px] gap-1 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+                <span className="text-xs font-extrabold uppercase tracking-wide text-navy-700">
+                  To
+                </span>
+                <select
                   value={endTime}
                   onChange={(event) => setEndTime(event.target.value)}
-                  onInput={(event) => setEndTime(event.currentTarget.value)}
-                  className="w-24 bg-transparent text-right text-base font-extrabold text-navy-900 outline-none"
+                  className="w-full appearance-none bg-transparent text-base font-extrabold text-navy-900 outline-none"
                   aria-label="Plan end time"
-                />
+                >
+                  {hourOptions.slice(1).map((option) => (
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      disabled={option.value <= startTime}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </label>
             </div>
           </div>
@@ -259,9 +294,9 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
             <textarea
               value={additionalDetails}
               onChange={(event) => setAdditionalDetails(event.target.value)}
-              rows={4}
-              className="w-full max-w-3xl resize-none rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3 text-base font-semibold leading-7 text-navy-900 outline-none transition placeholder:text-navy-700/55 focus:border-sea-500 focus:ring-4 focus:ring-sea-500/20"
-              placeholder="Example: I want to visit the main historic sights and have lunch nearby. Plan the rest of the day around that."
+              rows={3}
+              className="w-full max-w-2xl resize-none rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3 text-sm font-semibold leading-6 text-navy-900 outline-none transition placeholder:text-navy-700/55 focus:border-sea-500 focus:ring-4 focus:ring-sea-500/20"
+              placeholder="Example: main historic sights, lunch nearby, relaxed pace."
               aria-label="Additional planning details"
             />
           </div>

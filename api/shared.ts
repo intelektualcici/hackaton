@@ -60,7 +60,7 @@ export const timelineItemSchema = z.object({
 
 export const planResponseSchema = z.object({
   title: z.string().min(1).max(120),
-  summary: z.string().min(1).max(240),
+  summary: z.string().min(1).max(200),
   timeline: z.array(timelineItemSchema),
 });
 

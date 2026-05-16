@@ -1,10 +1,17 @@
 import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  Polyline,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 import type { DisplayRecommendation } from "../types/planner";
 import { categoryMeta } from "../types/recommendation";
 import { formatDuration, formatPriceRange } from "../utils/filterRecommendations";
-import { createCategoryIcon, splitCenter } from "../utils/mapHelpers";
+import { createRoadmapIcon, splitCenter } from "../utils/mapHelpers";
 
 interface SplitMapProps {
   items: DisplayRecommendation[];
@@ -28,15 +35,60 @@ const MarkerLayer = ({
     const marker = markerRefs.current[activeId];
     if (!active || !marker) return;
 
+    let centered = false;
+    const centerActivePopup = () => {
+      if (centered) return;
+      centered = true;
+      marker.openPopup();
+
+      window.setTimeout(() => {
+        const popup = marker.getPopup()?.getElement();
+        const mapContainer = map.getContainer();
+        if (!popup || !mapContainer) return;
+
+        const popupRect = popup.getBoundingClientRect();
+        const mapRect = mapContainer.getBoundingClientRect();
+        const deltaX =
+          popupRect.left + popupRect.width / 2 - (mapRect.left + mapRect.width / 2);
+        const deltaY =
+          popupRect.top + popupRect.height / 2 - (mapRect.top + mapRect.height / 2);
+
+        map.panBy([deltaX, deltaY], { animate: false });
+      }, 120);
+    };
+
+    map.once("moveend", centerActivePopup);
     map.flyTo([active.recommendation.lat, active.recommendation.lng], 14, {
-      duration: 0.8,
+      duration: 0.55,
     });
-    marker.openPopup();
+    const fallbackTimer = window.setTimeout(centerActivePopup, 750);
+
+    return () => {
+      map.off("moveend", centerActivePopup);
+      window.clearTimeout(fallbackTimer);
+    };
   }, [activeId, items, map]);
+
+  const routePositions = items.map((item) => [
+    item.recommendation.lat,
+    item.recommendation.lng,
+  ]) as [number, number][];
 
   return (
     <>
-      {items.map((item) => {
+      {routePositions.length > 1 && (
+        <Polyline
+          positions={routePositions}
+          pathOptions={{
+            color: "#2F8FA3",
+            opacity: 0.72,
+            weight: 4,
+            dashArray: "8 10",
+          }}
+        />
+      )}
+
+      {items.map((item, index) => {
         const recommendation = item.recommendation;
         const isSelected = selectedIds.has(recommendation.id);
         const isActive = activeId === recommendation.id;
@@ -46,7 +98,7 @@ const MarkerLayer = ({
           <Marker
             key={recommendation.id}
             position={[recommendation.lat, recommendation.lng]}
-            icon={createCategoryIcon(recommendation.category, isActive, isSelected)}
+            icon={createRoadmapIcon(index + 1, isActive, isSelected)}
             ref={(marker) => {
               if (marker) markerRefs.current[recommendation.id] = marker;
             }}
@@ -55,8 +107,8 @@ const MarkerLayer = ({
               mouseover: () => onMarkerFocus(recommendation.id),
             }}
           >
-            <Popup>
-              <div className="w-64">
+            <Popup autoPan={false}>
+              <div className="max-h-80 w-64 overflow-y-auto pr-1">
                 <div className="mb-2 flex items-center gap-2">
                   <span
                     className="flex h-8 w-8 items-center justify-center rounded-full text-base"

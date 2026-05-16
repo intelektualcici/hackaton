@@ -34,6 +34,10 @@ const PlanTimeline = ({
   const reasonById = new Map(
     items.map((item) => [item.recommendation.id, item.reason]),
   );
+  const itemById = new Map(items.map((item) => [item.recommendation.id, item]));
+  const roadmapItems = plan.timeline
+    .map((item) => itemById.get(item.recommendationId))
+    .filter((item): item is DisplayRecommendation => Boolean(item));
   const selectedIds = new Set(selectedRecommendations.map((item) => item.id));
 
   return (
@@ -51,9 +55,9 @@ const PlanTimeline = ({
         <p className="mt-4 text-lg leading-8 text-navy-700">{plan.summary}</p>
 
         <div className="mt-9 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-          <div className="lg:sticky lg:top-6">
+          <div className="lg:sticky lg:top-6 lg:self-start">
             <SplitMap
-              items={items}
+              items={roadmapItems}
               selectedIds={selectedIds}
               activeId={activeId}
               onMarkerFocus={onFocus}
