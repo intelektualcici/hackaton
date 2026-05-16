@@ -1,5 +1,6 @@
-import { Euro, Search, Users } from "lucide-react";
+import { Clock3, Euro, Search, Tags, UsersRound } from "lucide-react";
 import { motion } from "motion/react";
+import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
 import type { PlannerCriteria, TimeOption } from "../types/planner";
 import type { GroupType, RecommendationCategory } from "../types/recommendation";
@@ -29,6 +30,21 @@ const interestOptions: RecommendationCategory[] = [
 const chipBase =
   "rounded-lg border px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-sea-500/20";
 
+const FieldLabel = ({
+  icon: Icon,
+  children,
+}: {
+  icon: LucideIcon;
+  children: string;
+}) => (
+  <label className="mb-3 flex items-center gap-2 text-sm font-extrabold text-navy-900">
+    <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-sea-500/10 text-sea-700">
+      <Icon className="h-4 w-4" aria-hidden="true" />
+    </span>
+    {children}
+  </label>
+);
+
 const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
   const [time, setTime] = useState<TimeOption | "">("");
   const [budgetMin, setBudgetMin] = useState(0);
@@ -47,31 +63,43 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
   const canSubmit = Boolean(time && group && interests.length > 0 && budgetMax >= budgetMin);
 
   return (
-    <section id="planner-form" className="px-5 py-16 sm:px-8 lg:px-12">
+    <section id="planner-form" className="min-h-screen bg-white px-5 py-20 sm:px-8 lg:px-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}
         transition={{ duration: 0.5 }}
-        className="mx-auto max-w-5xl rounded-lg bg-white p-5 shadow-card sm:p-8"
+        className="mx-auto w-full"
       >
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-bold uppercase text-sea-600">
-              Personalize your plan
+        <div className="mb-12 grid gap-8 rounded-lg bg-[#1b1b19] p-6 text-white shadow-card sm:p-9 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:p-12">
+          <h2 className="font-heading text-5xl font-extrabold leading-none text-white sm:text-7xl lg:text-8xl">
+            <span className="block">Personalize</span>
+            <span className="block">your plan</span>
+          </h2>
+          <div className="max-w-3xl lg:justify-self-end">
+            <p className="text-base leading-8 text-white/88 sm:text-lg">
+              Tell us your time, budget and interests — Visit Split recommends
+              places, events and experiences, then turns your picks into a
+              personalized plan.
             </p>
-            <h2 className="mt-2 font-heading text-3xl font-extrabold text-navy-900 sm:text-4xl">
-              Tell us your Split style
-            </h2>
-          </div>
-          <div className="inline-flex w-fit items-center gap-2 rounded-lg bg-sea-500/10 px-3 py-2 text-sm font-bold text-sea-700">
-            <Users className="h-4 w-4" aria-hidden="true" />
-            Demo-ready in one minute
+            <a
+              href="#planner-fields"
+              className="mt-8 inline-flex rounded-lg bg-sun-400 px-5 py-3 text-sm font-extrabold uppercase text-navy-900 transition hover:-translate-y-0.5 hover:bg-sun-500 focus:outline-none focus:ring-4 focus:ring-sun-400/35"
+            >
+              Personalize ↓
+            </a>
           </div>
         </div>
 
+        <div className="sr-only">
+          <h2>
+              Personalize your plan
+          </h2>
+        </div>
+
         <form
-          className="grid gap-7"
+          id="planner-fields"
+          className="scroll-mt-28 grid gap-7 rounded-lg bg-sand-50 p-5 shadow-card sm:p-8"
           onSubmit={(event) => {
             event.preventDefault();
             if (!canSubmit || !time || !group) return;
@@ -79,9 +107,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           }}
         >
           <div>
-            <label className="mb-3 block text-sm font-extrabold text-navy-900">
-              Time available
-            </label>
+            <FieldLabel icon={Clock3}>Time available</FieldLabel>
             <div className="flex flex-wrap gap-3">
               {timeOptions.map((option) => (
                 <button
@@ -101,11 +127,9 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           </div>
 
           <div>
-            <label className="mb-3 block text-sm font-extrabold text-navy-900">
-              Budget per person
-            </label>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+            <FieldLabel icon={Euro}>Budget per person</FieldLabel>
+            <div className="grid max-w-xl gap-3 sm:grid-cols-2">
+              <label className="flex max-w-[260px] items-center gap-3 rounded-lg border border-navy-900/10 bg-white px-4 py-3">
                 <Euro className="h-5 w-5 text-sea-600" aria-hidden="true" />
                 <span className="text-sm font-bold text-navy-700">From</span>
                 <input
@@ -113,11 +137,11 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
                   min="0"
                   value={budgetMin}
                   onChange={(event) => setBudgetMin(Number(event.target.value))}
-                  className="w-full bg-transparent text-right text-lg font-extrabold text-navy-900 outline-none"
+                  className="w-20 bg-transparent text-right text-lg font-extrabold text-navy-900 outline-none"
                   aria-label="Budget from euros"
                 />
               </label>
-              <label className="flex items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
+              <label className="flex max-w-[260px] items-center gap-3 rounded-lg border border-navy-900/10 bg-white px-4 py-3">
                 <Euro className="h-5 w-5 text-sea-600" aria-hidden="true" />
                 <span className="text-sm font-bold text-navy-700">To</span>
                 <input
@@ -125,7 +149,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
                   min="0"
                   value={budgetMax}
                   onChange={(event) => setBudgetMax(Number(event.target.value))}
-                  className="w-full bg-transparent text-right text-lg font-extrabold text-navy-900 outline-none"
+                  className="w-20 bg-transparent text-right text-lg font-extrabold text-navy-900 outline-none"
                   aria-label="Budget to euros"
                 />
               </label>
@@ -133,9 +157,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           </div>
 
           <div>
-            <label className="mb-3 block text-sm font-extrabold text-navy-900">
-              Group type
-            </label>
+            <FieldLabel icon={UsersRound}>Group type</FieldLabel>
             <div className="flex flex-wrap gap-3">
               {groupOptions.map((option) => (
                 <button
@@ -155,9 +177,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           </div>
 
           <div>
-            <label className="mb-3 block text-sm font-extrabold text-navy-900">
-              Interests
-            </label>
+            <FieldLabel icon={Tags}>Interests</FieldLabel>
             <div className="flex flex-wrap gap-3">
               {interestOptions.map((interest) => {
                 const selected = interests.includes(interest);
@@ -173,7 +193,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
                         : "border-navy-900/10 bg-sand-50 text-navy-800 hover:border-sun-500/45"
                     }`}
                   >
-                    <span aria-hidden="true">{meta.emoji}</span> {meta.label}
+                    {meta.label}
                   </button>
                 );
               })}
@@ -183,7 +203,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           <button
             type="submit"
             disabled={!canSubmit || isLoading}
-            className="inline-flex items-center justify-center gap-3 rounded-lg bg-navy-900 px-6 py-4 text-base font-extrabold text-white shadow-card transition hover:-translate-y-0.5 hover:bg-navy-800 focus:outline-none focus:ring-4 focus:ring-navy-900/20 disabled:cursor-not-allowed disabled:opacity-55"
+            className="inline-flex justify-self-start items-center justify-center gap-3 rounded-lg bg-navy-900 px-5 py-3 text-sm font-extrabold text-white shadow-card transition hover:-translate-y-0.5 hover:bg-navy-800 focus:outline-none focus:ring-4 focus:ring-navy-900/20 disabled:cursor-not-allowed disabled:opacity-55"
           >
             <Search className="h-5 w-5" aria-hidden="true" />
             {isLoading ? "Finding recommendations..." : "Find recommendations"}

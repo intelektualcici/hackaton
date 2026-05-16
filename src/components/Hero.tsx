@@ -1,76 +1,43 @@
-import { ArrowRight, MapPinned, Route, Sparkles, WandSparkles } from "lucide-react";
 import { motion } from "motion/react";
 
-interface HeroProps {
-  onStart: () => void;
-}
-
-const heroImage =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Split%20-%20Riva%20002.jpg?width=1800";
-
-const badges = [
-  { label: "AI-powered recommendations", icon: WandSparkles },
-  { label: "Local Split experiences", icon: Sparkles },
-  { label: "Map-based planning", icon: MapPinned },
-  { label: "Personalized itinerary", icon: Route },
-];
-
-const Hero = ({ onStart }: HeroProps) => {
+const Hero = () => {
   return (
-    <section
-      className="relative isolate flex min-h-[88vh] overflow-hidden bg-navy-900 px-5 py-8 text-white sm:px-8 lg:px-12"
-      style={{
-        backgroundImage: `linear-gradient(90deg, rgba(16, 32, 51, 0.9), rgba(16, 32, 51, 0.56) 46%, rgba(16, 32, 51, 0.18)), url("${heroImage}")`,
-        backgroundPosition: "center",
-        backgroundSize: "cover",
-      }}
-    >
-      <div className="mx-auto flex w-full max-w-7xl flex-col justify-end pb-10 pt-16">
+    <section className="relative isolate min-h-[88vh] overflow-hidden bg-sand-50">
+      <div className="absolute inset-y-0 right-0 w-full lg:w-[72%]">
+        <video
+          className="h-full w-full object-cover"
+          src="/videos/panorama-grada.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-label="Panorama video of Split"
+        />
+        <div className="absolute inset-0 bg-navy-900/8" />
+      </div>
+
+      <svg
+        className="absolute inset-y-0 left-0 z-10 hidden h-full w-[47%] text-white lg:block"
+        viewBox="0 0 900 900"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path
+          fill="currentColor"
+          d="M0 0H755C704 43 702 91 748 139C806 199 805 282 739 349C681 408 682 483 743 543C812 611 812 701 740 771C697 813 694 860 734 900H0V0Z"
+        />
+      </svg>
+
+      <div className="relative z-20 flex min-h-[88vh] items-center px-5 py-16 sm:px-8 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease: "easeOut" }}
-          className="max-w-3xl"
+          className="max-w-md rounded-lg bg-white/92 p-6 shadow-card backdrop-blur-sm lg:bg-transparent lg:p-0 lg:pl-2 lg:pt-20 lg:shadow-none lg:backdrop-blur-none"
         >
-          <p className="mb-5 inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur">
-            Visit Split
-          </p>
-          <h1 className="font-heading text-5xl font-extrabold leading-tight sm:text-6xl lg:text-7xl">
+          <h1 className="font-heading text-4xl font-extrabold leading-tight text-navy-900 sm:text-5xl lg:text-6xl">
             Plan your perfect Split day in seconds.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-white/88 sm:text-xl">
-            Tell us your time, budget and interests — Visit Split recommends
-            places, events and experiences, then turns your picks into a
-            personalized plan.
-          </p>
-          <button
-            type="button"
-            onClick={onStart}
-            className="mt-8 inline-flex items-center gap-3 rounded-lg bg-sun-500 px-6 py-4 text-base font-bold text-navy-900 shadow-card transition hover:-translate-y-0.5 hover:bg-sun-400 focus:outline-none focus:ring-4 focus:ring-sun-400/45"
-          >
-            Start planning
-            <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </button>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.55 }}
-          className="mt-12 grid gap-3 sm:grid-cols-2 lg:max-w-4xl lg:grid-cols-4"
-        >
-          {badges.map((badge) => {
-            const Icon = badge.icon;
-            return (
-              <div
-                key={badge.label}
-                className="rounded-lg border border-white/18 bg-white/12 p-4 backdrop-blur-md"
-              >
-                <Icon className="mb-4 h-5 w-5 text-sun-400" aria-hidden="true" />
-                <p className="text-sm font-semibold text-white">{badge.label}</p>
-              </div>
-            );
-          })}
         </motion.div>
       </div>
     </section>

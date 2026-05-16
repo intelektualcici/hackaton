@@ -80,9 +80,6 @@ const App = () => {
   const [displayRecommendations, setDisplayRecommendations] = useState<
     DisplayRecommendation[]
   >([]);
-  const [recommendationSource, setRecommendationSource] = useState<
-    "ai" | "fallback" | null
-  >(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
   const [plan, setPlan] = useState<ItineraryPlan | null>(null);
@@ -103,10 +100,6 @@ const App = () => {
       }));
   }, [displayRecommendations, selectedIds]);
 
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const handleFindRecommendations = async (nextCriteria: PlannerCriteria) => {
     setCriteria(nextCriteria);
     setIsFinding(true);
@@ -125,12 +118,10 @@ const App = () => {
           ? joined
           : joinRankings(rankFallback(source, nextCriteria).slice(0, 12), source),
       );
-      setRecommendationSource(result.source);
     } catch {
       setDisplayRecommendations(
         joinRankings(rankFallback(source, nextCriteria).slice(0, 12), source),
       );
-      setRecommendationSource("fallback");
     } finally {
       setIsFinding(false);
       window.setTimeout(() => {
@@ -175,7 +166,15 @@ const App = () => {
 
   return (
     <main className="min-h-screen overflow-hidden text-navy-900">
-      <Hero onStart={scrollToForm} />
+      <header className="fixed left-5 top-5 z-50 sm:left-8 sm:top-6 lg:left-12">
+        <img
+          src="/images/visit-split-logo.png"
+          alt="Visit Split"
+          className="h-16 w-16 object-cover shadow-card sm:h-20 sm:w-20 lg:h-24 lg:w-24"
+        />
+      </header>
+
+      <Hero />
 
       <div ref={formRef}>
         <PlannerForm
@@ -191,7 +190,6 @@ const App = () => {
           activeId={activeId}
           isLoading={isFinding}
           isCreatingPlan={isCreatingPlan}
-          source={recommendationSource}
           onToggle={handleToggleRecommendation}
           onFocus={setActiveId}
           onHover={setActiveId}

@@ -11,7 +11,6 @@ interface RecommendationsSectionProps {
   activeId: string | null;
   isLoading: boolean;
   isCreatingPlan: boolean;
-  source: "ai" | "fallback" | null;
   onToggle: (id: string) => void;
   onFocus: (id: string) => void;
   onHover: (id: string | null) => void;
@@ -24,7 +23,6 @@ const RecommendationsSection = ({
   activeId,
   isLoading,
   isCreatingPlan,
-  source,
   onToggle,
   onFocus,
   onHover,
@@ -54,10 +52,7 @@ const RecommendationsSection = ({
       >
         <div className="mb-7 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase text-sea-600">
-              {source === "fallback" ? "Local fallback mode" : "AI-ranked matches"}
-            </p>
-            <h2 className="mt-2 font-heading text-3xl font-extrabold text-navy-900 sm:text-4xl">
+            <h2 className="font-heading text-3xl font-extrabold text-navy-900 sm:text-4xl">
               Recommended for you
             </h2>
           </div>
