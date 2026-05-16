@@ -31,7 +31,7 @@ const RecommendationCard = ({
       onMouseEnter={() => onHover(recommendation.id)}
       onMouseLeave={() => onHover(null)}
       onClick={() => onFocus(recommendation.id)}
-      className={`cursor-pointer rounded-lg border bg-white p-4 shadow-sm transition ${
+      className={`cursor-pointer rounded-lg border bg-sand-50 p-4 shadow-sm transition ${
         isSelected
           ? "border-sun-500 shadow-lift"
           : isActive
@@ -49,7 +49,7 @@ const RecommendationCard = ({
           className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-4 focus:ring-sun-500/25 ${
             isSelected
               ? "border-sun-500 bg-sun-500 text-navy-900"
-              : "border-navy-900/20 bg-white text-transparent"
+              : "border-navy-900/20 bg-sand-50 text-transparent"
           }`}
           aria-label={`${isSelected ? "Deselect" : "Select"} ${recommendation.title}`}
           aria-pressed={isSelected}

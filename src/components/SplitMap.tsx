@@ -61,7 +61,7 @@ const MarkerLayer = ({
                 <div className="mb-2 flex items-center gap-2">
                   <span
                     className="flex h-8 w-8 items-center justify-center rounded-full text-base"
-                    style={{ backgroundColor: meta.marker, color: "#fff" }}
+                    style={{ backgroundColor: meta.marker, color: "#F6F2EA" }}
                     aria-hidden="true"
                   >
                     {meta.emoji}
@@ -90,7 +90,7 @@ const MarkerLayer = ({
                   href={recommendation.googleMapsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg bg-sea-600 px-3 py-2 text-xs font-extrabold text-white"
+                  className="mt-3 inline-flex items-center gap-2 rounded-lg bg-sea-600 px-3 py-2 text-xs font-extrabold text-sand-50"
                 >
                   Open in Google Maps
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
@@ -113,7 +113,7 @@ const SplitMap = ({ items, selectedIds, activeId, onMarkerFocus }: SplitMapProps
   }, [items]);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-navy-900/10 bg-white p-2 shadow-card">
+    <div className="overflow-hidden rounded-lg border border-navy-900/10 bg-sand-50 p-2 shadow-card">
       <MapContainer
         center={splitCenter}
         zoom={13}

@@ -97,6 +97,9 @@ const App = () => {
         durationMinutes: recommendation.durationMinutes,
         googleMapsUrl: recommendation.googleMapsUrl,
         category: recommendation.category,
+        address: recommendation.address,
+        priceMin: recommendation.priceMin,
+        priceMax: recommendation.priceMax,
       }));
   }, [displayRecommendations, selectedIds]);
 

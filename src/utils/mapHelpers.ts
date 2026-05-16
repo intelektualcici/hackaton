@@ -10,7 +10,7 @@ export const createCategoryIcon = (
 ) => {
   const meta = categoryMeta[category];
   const size = isActive || isSelected ? 42 : 34;
-  const border = isSelected ? "#f59e32" : "#ffffff";
+  const border = isSelected ? "#F4B24A" : "#F6F2EA";
 
   return L.divIcon({
     className: "visit-split-marker",

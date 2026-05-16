@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "motion/react";
-import { Sparkles } from "lucide-react";
 import type { DisplayRecommendation } from "../types/planner";
 import LoadingState from "./LoadingState";
 import RecommendationCard from "./RecommendationCard";
@@ -50,16 +49,21 @@ const RecommendationsSection = ({
         transition={{ duration: 0.5 }}
         className="mx-auto max-w-7xl"
       >
-        <div className="mb-7 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div className="mb-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="font-heading text-3xl font-extrabold text-navy-900 sm:text-4xl">
               Recommended for you
             </h2>
           </div>
-          <p className="max-w-xl text-sm leading-6 text-navy-700">
-            Select the experiences you like. Visit Split will only use your picks
-            when it creates the final itinerary.
-          </p>
+          <div className="max-w-xl rounded-lg border border-sea-500/20 bg-sea-50 px-5 py-4 shadow-sm">
+            <p className="text-sm font-extrabold uppercase tracking-wide text-sea-700">
+              Your picks control the plan
+            </p>
+            <p className="mt-2 text-base font-bold leading-7 text-navy-900">
+              Select the experiences you like. Visit Split will only use your
+              picks when it creates the final itinerary.
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -95,7 +99,7 @@ const RecommendationsSection = ({
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 14 }}
-                  className="rounded-lg border border-sun-500/30 bg-white p-4 shadow-card"
+                  className="rounded-lg border border-sun-500/30 bg-sand-50 p-4 shadow-card"
                 >
                   <button
                     type="button"
@@ -103,7 +107,6 @@ const RecommendationsSection = ({
                     disabled={isCreatingPlan}
                     className="flex w-full items-center justify-center gap-3 rounded-lg bg-sun-500 px-5 py-4 text-base font-extrabold text-navy-900 transition hover:-translate-y-0.5 hover:bg-sun-400 focus:outline-none focus:ring-4 focus:ring-sun-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <Sparkles className="h-5 w-5" aria-hidden="true" />
                     {isCreatingPlan
                       ? "Creating your personalized Split plan..."
                       : `Create my plan with ${selectedCount} selected`}

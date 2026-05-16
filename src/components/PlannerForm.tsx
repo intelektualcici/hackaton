@@ -63,7 +63,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
   const canSubmit = Boolean(time && group && interests.length > 0 && budgetMax >= budgetMin);
 
   return (
-    <section id="planner-form" className="min-h-screen bg-white px-5 py-20 sm:px-8 lg:px-12">
+    <section id="planner-form" className="min-h-screen bg-sand-50 px-5 py-20 sm:px-8 lg:px-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -71,13 +71,13 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
         transition={{ duration: 0.5 }}
         className="mx-auto w-full"
       >
-        <div className="mb-12 grid gap-8 rounded-lg bg-[#1b1b19] p-6 text-white shadow-card sm:p-9 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:p-12">
-          <h2 className="font-heading text-5xl font-extrabold leading-none text-white sm:text-7xl lg:text-8xl">
+        <div className="mb-12 grid gap-8 rounded-lg bg-navy-900 p-6 text-sand-50 shadow-card sm:p-9 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:p-12">
+          <h2 className="font-heading text-5xl font-extrabold leading-none text-sand-50 sm:text-7xl lg:text-8xl">
             <span className="block">Personalize</span>
             <span className="block">your plan</span>
           </h2>
           <div className="max-w-3xl lg:justify-self-end">
-            <p className="text-base leading-8 text-white/88 sm:text-lg">
+            <p className="text-base leading-8 text-sand-50/90 sm:text-lg">
               Tell us your time, budget and interests — Visit Split recommends
               places, events and experiences, then turns your picks into a
               personalized plan.
@@ -99,7 +99,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
 
         <form
           id="planner-fields"
-          className="scroll-mt-28 grid gap-7 rounded-lg bg-sand-50 p-5 shadow-card sm:p-8"
+          className="mx-auto grid w-full max-w-5xl scroll-mt-28 gap-7 rounded-lg bg-sand-100 p-5 shadow-card sm:p-8"
           onSubmit={(event) => {
             event.preventDefault();
             if (!canSubmit || !time || !group) return;
@@ -116,7 +116,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
                   onClick={() => setTime(option)}
                   className={`${chipBase} ${
                     time === option
-                      ? "border-sea-500 bg-sea-500 text-white"
+                      ? "border-sea-500 bg-sea-500 text-sand-50"
                       : "border-navy-900/10 bg-sand-50 text-navy-800 hover:border-sea-500/40"
                   }`}
                 >
@@ -129,7 +129,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           <div>
             <FieldLabel icon={Euro}>Budget per person</FieldLabel>
             <div className="grid max-w-xl gap-3 sm:grid-cols-2">
-              <label className="flex max-w-[260px] items-center gap-3 rounded-lg border border-navy-900/10 bg-white px-4 py-3">
+              <label className="flex max-w-[260px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
                 <Euro className="h-5 w-5 text-sea-600" aria-hidden="true" />
                 <span className="text-sm font-bold text-navy-700">From</span>
                 <input
@@ -141,7 +141,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
                   aria-label="Budget from euros"
                 />
               </label>
-              <label className="flex max-w-[260px] items-center gap-3 rounded-lg border border-navy-900/10 bg-white px-4 py-3">
+              <label className="flex max-w-[260px] items-center gap-3 rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3">
                 <Euro className="h-5 w-5 text-sea-600" aria-hidden="true" />
                 <span className="text-sm font-bold text-navy-700">To</span>
                 <input
@@ -166,7 +166,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
                   onClick={() => setGroup(option.value)}
                   className={`${chipBase} ${
                     group === option.value
-                      ? "border-sea-500 bg-sea-500 text-white"
+                      ? "border-sea-500 bg-sea-500 text-sand-50"
                       : "border-navy-900/10 bg-sand-50 text-navy-800 hover:border-sea-500/40"
                   }`}
                 >
@@ -203,7 +203,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
           <button
             type="submit"
             disabled={!canSubmit || isLoading}
-            className="inline-flex justify-self-start items-center justify-center gap-3 rounded-lg bg-navy-900 px-5 py-3 text-sm font-extrabold text-white shadow-card transition hover:-translate-y-0.5 hover:bg-navy-800 focus:outline-none focus:ring-4 focus:ring-navy-900/20 disabled:cursor-not-allowed disabled:opacity-55"
+            className="inline-flex items-center justify-center gap-3 justify-self-start rounded-lg bg-navy-900 px-5 py-3 text-sm font-extrabold text-sand-50 shadow-card transition hover:-translate-y-0.5 hover:bg-navy-800 focus:outline-none focus:ring-4 focus:ring-navy-900/20 disabled:cursor-not-allowed disabled:opacity-55"
           >
             <Search className="h-5 w-5" aria-hidden="true" />
             {isLoading ? "Finding recommendations..." : "Find recommendations"}

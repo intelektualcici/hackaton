@@ -29,7 +29,10 @@ export interface SelectedRecommendation {
   lng: Recommendation["lng"];
   durationMinutes: Recommendation["durationMinutes"];
   googleMapsUrl?: Recommendation["googleMapsUrl"];
-  category?: Recommendation["category"];
+  category: Recommendation["category"];
+  address: Recommendation["address"];
+  priceMin: Recommendation["priceMin"];
+  priceMax: Recommendation["priceMax"];
 }
 
 export interface TimelineItem {

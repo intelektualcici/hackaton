@@ -17,7 +17,7 @@ const Hero = () => {
       </div>
 
       <svg
-        className="absolute inset-y-0 left-0 z-10 hidden h-full w-[47%] text-white lg:block"
+        className="absolute inset-y-0 left-0 z-10 hidden h-full w-[47%] text-sand-50 lg:block"
         viewBox="0 0 900 900"
         preserveAspectRatio="none"
         aria-hidden="true"
@@ -33,7 +33,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease: "easeOut" }}
-          className="max-w-md rounded-lg bg-white/92 p-6 shadow-card backdrop-blur-sm lg:bg-transparent lg:p-0 lg:pl-2 lg:pt-20 lg:shadow-none lg:backdrop-blur-none"
+          className="max-w-md rounded-lg bg-sand-50/95 p-6 shadow-card backdrop-blur-sm lg:bg-transparent lg:p-0 lg:pl-2 lg:pt-20 lg:shadow-none lg:backdrop-blur-none"
         >
           <h1 className="font-heading text-4xl font-extrabold leading-tight text-navy-900 sm:text-5xl lg:text-6xl">
             Plan your perfect Split day in seconds.

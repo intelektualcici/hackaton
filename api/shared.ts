@@ -23,9 +23,10 @@ export const selectedRecommendationSchema = z.object({
   lng: z.number(),
   durationMinutes: z.number().positive(),
   googleMapsUrl: z.string().optional(),
-  category: z
-    .enum(["food", "beaches", "history", "nightlife", "events", "nature"])
-    .optional(),
+  category: z.enum(["food", "beaches", "history", "nightlife", "events", "nature"]),
+  address: z.string(),
+  priceMin: z.number().min(0),
+  priceMax: z.number().min(0),
 });
 
 export const rankedRecommendationSchema = z.object({
