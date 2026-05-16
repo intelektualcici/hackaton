@@ -1,4 +1,4 @@
-import { Clock3, Euro, MapPin, MapPinned } from "lucide-react";
+import { Clock3, Euro, MapPin } from "lucide-react";
 import { motion } from "motion/react";
 import type {
   DisplayRecommendation,
@@ -55,7 +55,7 @@ const PlanTimeline = ({
         <p className="mt-4 text-lg leading-8 text-navy-700">{plan.summary}</p>
 
         <div className="mt-9 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-          <div className="lg:sticky lg:top-6 lg:self-start">
+          <div className="lg:sticky lg:top-8 lg:self-start">
             <SplitMap
               items={roadmapItems}
               selectedIds={selectedIds}
@@ -84,8 +84,14 @@ const PlanTimeline = ({
                     onMouseLeave={() => onHover(null)}
                     onClick={() => onFocus(item.recommendationId)}
                   >
-                    <div className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full bg-sea-600 text-sand-50 shadow-card">
-                      <MapPinned className="h-4 w-4" aria-hidden="true" />
+                    <div
+                      className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full text-sm font-extrabold shadow-card transition ${
+                        isActive
+                          ? "bg-sun-500 text-navy-900"
+                          : "bg-sea-600 text-sand-50"
+                      }`}
+                    >
+                      {index + 1}
                     </div>
                     <article
                       className={`cursor-pointer rounded-lg border bg-sand-50 p-4 transition ${

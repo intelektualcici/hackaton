@@ -111,6 +111,20 @@ const minutesToRange = (start: number, duration: number): string => {
   return `${format(start)} - ${format(start + duration)}`;
 };
 
+const getSelectedZone = (item: SelectedRecommendation): "center" | "east" | "west" => {
+  if (item.lng < 16.431) return "west";
+  if (item.lng > 16.454) return "east";
+  return "center";
+};
+
+const travelBufferMinutes = (
+  previous: SelectedRecommendation | null,
+  next: SelectedRecommendation,
+): number => {
+  if (!previous) return 0;
+  return getSelectedZone(previous) === getSelectedZone(next) ? 5 : 10;
+};
+
 const fallbackSummary = (criteria: PlannerCriteria): string => {
   const interests = criteria.interests.join(", ");
   const details = criteria.additionalDetails
@@ -134,27 +148,22 @@ export const createFallbackPlan = (
 ): ItineraryPlan => {
   const maxMinutes = getAvailableMinutes(criteria);
   const startMinutes = timeStringToMinutes(criteria.startTime);
-  const totalSelectedMinutes = selectedRecommendations.reduce(
-    (sum, item) => sum + item.durationMinutes,
-    0,
-  );
-  let elapsed = 0;
+  const endMinutes = startMinutes + maxMinutes;
+  const timeline = [];
+  let cursor = startMinutes;
+  let previous: SelectedRecommendation | null = null;
 
-  const timeline = selectedRecommendations.map((item, index) => {
-    const remainingItems = selectedRecommendations.length - index;
-    const remainingMinutes = Math.max(20 * remainingItems, maxMinutes - elapsed);
-    const suggestedDuration =
-      totalSelectedMinutes > maxMinutes
-        ? Math.max(20, Math.round((remainingMinutes / remainingItems) / 5) * 5)
-        : item.durationMinutes;
-    const duration =
-      index === selectedRecommendations.length - 1
-        ? Math.max(20, maxMinutes - elapsed)
-        : Math.min(suggestedDuration, Math.max(20, maxMinutes - elapsed - 20));
-    const time = minutesToRange(startMinutes + elapsed, duration);
-    elapsed += duration;
+  for (const [index, item] of selectedRecommendations.entries()) {
+    cursor += travelBufferMinutes(previous, item);
+    const remainingMinutes = endMinutes - cursor;
+    if (remainingMinutes < 20) break;
 
-    return {
+    const duration = Math.min(item.durationMinutes, remainingMinutes);
+    const time = minutesToRange(cursor, duration);
+    cursor += duration;
+    previous = item;
+
+    timeline.push({
       time,
       recommendationId: item.id,
       title: item.title,
@@ -162,8 +171,8 @@ export const createFallbackPlan = (
         index === 0
           ? `Start with ${item.title}, a strong match for your Split preferences.`
           : `Continue to ${item.title} and keep the plan relaxed, walkable and demo-friendly.`,
-    };
-  });
+    });
+  }
 
   const groupLabel =
     criteria.group === "couple"

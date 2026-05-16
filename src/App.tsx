@@ -87,11 +87,178 @@ const toSelectedRecommendation = (
   priceMax: recommendation.priceMax,
 });
 
+const getDisplayItem = (
+  recommendation: Recommendation,
+  rankedById: Map<string, DisplayRecommendation>,
+  reason: string,
+): DisplayRecommendation => {
+  const ranked = rankedById.get(recommendation.id);
+
+  return (
+    ranked ?? {
+      recommendation,
+      score: 72,
+      reason,
+    }
+  );
+};
+
+const fitsDayBasics = (
+  recommendation: Recommendation,
+  criteria: PlannerCriteria,
+): boolean => {
+  return (
+    recommendation.suitableFor.includes(criteria.group) &&
+    recommendation.priceMin <= criteria.budgetMax &&
+    recommendation.durationMinutes <= getAvailableMinutes(criteria)
+  );
+};
+
+const fullDaySlots = [
+  {
+    ids: [
+      "diocletian-palace",
+      "split-old-town",
+      "peristyle-square",
+      "veli-varos",
+    ],
+    reason:
+      "Starts the day with Split's historic core before the streets get busiest.",
+  },
+  {
+    ids: ["coffee-on-riva", "riva-promenade", "pjaca"],
+    reason:
+      "Adds an easy Riva pause so the morning feels local, scenic and unhurried.",
+  },
+  {
+    ids: ["pazar-snack-stop", "local-food-experience", "green-market", "fish-market"],
+    reason:
+      "Creates a natural lunch or snack moment instead of rushing through sights.",
+  },
+  {
+    ids: [
+      "kasjuni-beach",
+      "bacvice-beach",
+      "bene-beach",
+      "marjan-hill",
+      "mestrovic-gallery",
+      "znjan-beach",
+    ],
+    reason:
+      "Moves the plan beyond the city center with a beach, Marjan or sea-view stop.",
+  },
+  {
+    ids: ["vidilica", "sunset-viewpoint", "west-coast-promenade", "sustipan"],
+    reason:
+      "Builds in a scenic late-day viewpoint before returning toward dinner.",
+  },
+  {
+    ids: ["dalmatian-wine-tasting", "matejuska", "fabrique-pub", "local-food-experience"],
+    reason:
+      "Gives the day a relaxed evening finish with food, wine or a local harbor mood.",
+  },
+];
+
+const chooseFromSlot = (
+  ids: string[],
+  recommendations: Recommendation[],
+  rankedById: Map<string, DisplayRecommendation>,
+  criteria: PlannerCriteria,
+  selectedIds: Set<string>,
+  usedMinutes: number,
+): Recommendation | null => {
+  const availableMinutes = getAvailableMinutes(criteria);
+  const remainingMinutes = availableMinutes - usedMinutes;
+
+  return (
+    ids
+      .map((id, index) => {
+        const recommendation = recommendations.find((item) => item.id === id);
+        if (!recommendation || selectedIds.has(recommendation.id)) return null;
+        if (!fitsDayBasics(recommendation, criteria)) return null;
+        if (recommendation.durationMinutes > remainingMinutes) return null;
+
+        const interestMatch = recommendation.interests.some((interest) =>
+          criteria.interests.includes(interest),
+        );
+        const rankedScore = rankedById.get(recommendation.id)?.score ?? 58;
+        const pricePenalty = Math.min(18, Math.floor(recommendation.priceMax / 5));
+
+        return {
+          recommendation,
+          score:
+            rankedScore * 0.25 +
+            (interestMatch ? 14 : 0) +
+            (ids.length - index) * 20 -
+            pricePenalty,
+        };
+      })
+      .filter((item): item is { recommendation: Recommendation; score: number } =>
+        Boolean(item),
+      )
+      .sort((a, b) => b.score - a.score)[0]?.recommendation ?? null
+  );
+};
+
+const chooseFullDayRecommendations = (
+  rankedItems: DisplayRecommendation[],
+  criteria: PlannerCriteria,
+): DisplayRecommendation[] => {
+  const rankedById = new Map(
+    rankedItems.map((item) => [item.recommendation.id, item]),
+  );
+  const selectedIds = new Set<string>();
+  const selected: DisplayRecommendation[] = [];
+  let usedMinutes = 0;
+  const maxStops = getAvailableMinutes(criteria) >= 600 ? 6 : 5;
+
+  for (const slot of fullDaySlots) {
+    if (selected.length >= maxStops) break;
+
+    const recommendation = chooseFromSlot(
+      slot.ids,
+      allRecommendations,
+      rankedById,
+      criteria,
+      selectedIds,
+      usedMinutes,
+    );
+
+    if (!recommendation) continue;
+
+    selected.push(getDisplayItem(recommendation, rankedById, slot.reason));
+    selectedIds.add(recommendation.id);
+    usedMinutes += recommendation.durationMinutes + 10;
+  }
+
+  for (const item of rankedItems) {
+    if (selected.length >= maxStops) break;
+    if (selectedIds.has(item.recommendation.id)) continue;
+    if (usedMinutes + item.recommendation.durationMinutes > getAvailableMinutes(criteria)) {
+      continue;
+    }
+
+    selected.push(item);
+    selectedIds.add(item.recommendation.id);
+    usedMinutes += item.recommendation.durationMinutes + 5;
+  }
+
+  return selected;
+};
+
 const choosePlanRecommendations = (
   items: DisplayRecommendation[],
   criteria: PlannerCriteria,
 ): DisplayRecommendation[] => {
   const availableMinutes = getAvailableMinutes(criteria);
+
+  if (availableMinutes >= 420) {
+    const fullDaySelection = chooseFullDayRecommendations(items, criteria);
+    if (fullDaySelection.length >= 3) {
+      return fullDaySelection;
+    }
+  }
+
   const selected: DisplayRecommendation[] = [];
   let usedMinutes = 0;
 
@@ -177,7 +344,7 @@ const App = () => {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden text-navy-900">
+    <main className="min-h-screen text-navy-900">
       <header className="fixed left-5 top-5 z-50 sm:left-8 sm:top-6 lg:left-12">
         <img
           src="/images/visit-split-logo.png"

@@ -73,7 +73,7 @@ const FieldLabel = ({
 const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
   const [date, setDate] = useState(getTodayInputValue);
   const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("12:00");
+  const [endTime, setEndTime] = useState("20:00");
   const [budgetMin, setBudgetMin] = useState(0);
   const [budgetMax, setBudgetMax] = useState(50);
   const [group, setGroup] = useState<GroupType | "">("");
@@ -125,6 +125,24 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
               Split recommends places, events and experiences, then turns your
               picks into a personalized plan.
             </p>
+            <div className="mt-7 grid max-w-lg grid-cols-2 gap-5 border-t border-sand-50/15 pt-6">
+              <div>
+                <p className="font-heading text-5xl font-extrabold leading-none text-sand-50 sm:text-6xl">
+                  300+
+                </p>
+                <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-sand-50/65">
+                  Local spots
+                </p>
+              </div>
+              <div>
+                <p className="font-heading text-5xl font-extrabold leading-none text-sand-50 sm:text-6xl">
+                  &lt;10s
+                </p>
+                <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-sand-50/65">
+                  Plan ready
+                </p>
+              </div>
+            </div>
             <a
               href="#planner-fields"
               className="mt-8 inline-flex rounded-lg bg-sun-400 px-5 py-3 text-sm font-extrabold uppercase text-navy-900 transition hover:-translate-y-0.5 hover:bg-sun-500 focus:outline-none focus:ring-4 focus:ring-sun-400/35"
@@ -142,7 +160,7 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
 
         <form
           id="planner-fields"
-          className="mx-auto grid w-full max-w-5xl scroll-mt-28 gap-7 rounded-lg bg-sand-100 p-5 shadow-card sm:p-8"
+          className="mx-auto grid w-fit max-w-full scroll-mt-28 gap-7 rounded-lg bg-sand-100 p-5 shadow-card sm:p-8"
           onSubmit={(event) => {
             event.preventDefault();
             if (!canSubmit || !group) return;
@@ -294,9 +312,9 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
             <textarea
               value={additionalDetails}
               onChange={(event) => setAdditionalDetails(event.target.value)}
-              rows={3}
-              className="w-full max-w-2xl resize-none rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3 text-sm font-semibold leading-6 text-navy-900 outline-none transition placeholder:text-navy-700/55 focus:border-sea-500 focus:ring-4 focus:ring-sea-500/20"
-              placeholder="Example: main historic sights, lunch nearby, relaxed pace."
+              rows={2}
+              className="block min-h-20 max-h-40 w-full max-w-lg resize-y rounded-lg border border-navy-900/10 bg-sand-50 px-4 py-3 text-sm font-semibold leading-6 text-navy-900 outline-none transition placeholder:text-navy-700/55 focus:border-sea-500 focus:ring-4 focus:ring-sea-500/20"
+              placeholder="Main historic sights, lunch nearby, relaxed pace..."
               aria-label="Additional planning details"
             />
           </div>
@@ -306,8 +324,28 @@ const PlannerForm = ({ isLoading, onSubmit }: PlannerFormProps) => {
             disabled={!canSubmit || isLoading}
             className="inline-flex items-center justify-center gap-3 justify-self-start rounded-lg bg-navy-900 px-5 py-3 text-sm font-extrabold text-sand-50 shadow-card transition hover:-translate-y-0.5 hover:bg-navy-800 focus:outline-none focus:ring-4 focus:ring-navy-900/20 disabled:cursor-not-allowed disabled:opacity-55"
           >
-            {isLoading ? "Creating your personalized Split plan..." : "Create plan"}
+            {isLoading ? "Generating plan..." : "Create plan"}
           </button>
+
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              role="status"
+              aria-live="polite"
+              className="flex max-w-xl items-center gap-3 rounded-lg border border-sea-500/20 bg-sea-50 px-4 py-3 text-sm font-semibold text-navy-800"
+            >
+              <motion.span
+                className="h-4 w-4 shrink-0 rounded-full border-2 border-sea-600 border-t-transparent"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 0.85, repeat: Infinity, ease: "linear" }}
+                aria-hidden="true"
+              />
+              <span>
+                AI is matching local places, timing the route and checking your budget.
+              </span>
+            </motion.div>
+          )}
         </form>
       </motion.div>
     </section>

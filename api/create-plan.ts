@@ -23,6 +23,94 @@ const formatTime = (minutes: number): string => {
   return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 };
 
+const getAvailableMinutes = (criteria: PlannerCriteria): number => {
+  return Math.max(0, timeToMinutes(criteria.endTime) - timeToMinutes(criteria.startTime));
+};
+
+const getZone = (item: SelectedRecommendation): "center" | "east" | "west" => {
+  if (item.lng < 16.431) return "west";
+  if (item.lng > 16.454) return "east";
+  return "center";
+};
+
+const getTravelBuffer = (
+  previous: SelectedRecommendation | null,
+  next: SelectedRecommendation,
+): number => {
+  if (!previous) return 0;
+  return getZone(previous) === getZone(next) ? 5 : 10;
+};
+
+const coffeeIds = new Set(["coffee-on-riva"]);
+const lunchIds = new Set([
+  "pazar-snack-stop",
+  "local-food-experience",
+  "green-market",
+  "fish-market",
+]);
+const afternoonIds = new Set([
+  "kasjuni-beach",
+  "bacvice-beach",
+  "bene-beach",
+  "znjan-beach",
+  "marjan-hill",
+  "mestrovic-gallery",
+  "nature-walk",
+]);
+const sunsetIds = new Set([
+  "vidilica",
+  "sunset-viewpoint",
+  "west-coast-promenade",
+  "sustipan",
+]);
+const eveningIds = new Set([
+  "dalmatian-wine-tasting",
+  "fabrique-pub",
+  "matejuska",
+]);
+
+const anchorTimeIfPossible = (
+  cursor: number,
+  target: number,
+  selected: SelectedRecommendation,
+  windowEnd: number,
+): number => {
+  if (target <= cursor) return cursor;
+  return target + Math.min(selected.durationMinutes, 30) <= windowEnd ? target : cursor;
+};
+
+const getAnchoredStart = (
+  cursor: number,
+  selected: SelectedRecommendation,
+  criteria: PlannerCriteria,
+): number => {
+  if (getAvailableMinutes(criteria) < 420) return cursor;
+
+  const windowEnd = timeToMinutes(criteria.endTime);
+
+  if (coffeeIds.has(selected.id)) {
+    return anchorTimeIfPossible(cursor, 9 * 60 + 45, selected, windowEnd);
+  }
+
+  if (lunchIds.has(selected.id)) {
+    return anchorTimeIfPossible(cursor, 12 * 60, selected, windowEnd);
+  }
+
+  if (afternoonIds.has(selected.id)) {
+    return anchorTimeIfPossible(cursor, 14 * 60, selected, windowEnd);
+  }
+
+  if (sunsetIds.has(selected.id)) {
+    return anchorTimeIfPossible(cursor, 17 * 60 + 30, selected, windowEnd);
+  }
+
+  if (eveningIds.has(selected.id)) {
+    return anchorTimeIfPossible(cursor, 19 * 60, selected, windowEnd);
+  }
+
+  return cursor;
+};
+
 const createLocalGuidePrompt = (criteria: PlannerCriteria): string => {
   const basePrompt = `You are a knowledgeable local guide building a day itinerary for Split, Croatia.
 
@@ -34,6 +122,11 @@ ORDERING RULES
   Add a 10-min travel buffer when moving between zones, 5 min within the same zone.
 - The \`time\` field must be a clock string like "09:30" or "14:00". Never output
   times like "midnight" or vague strings like "morning".
+- For 6h+ plans, create a real day rhythm when selectedRecommendations allow it:
+  Old Town/Riva/coffee in the morning, food around lunch, beach/Marjan or another
+  outdoor activity in the afternoon, then sunset or dinner/nightlife later.
+- Do not keep every stop in the palace core unless selectedRecommendations only include
+  palace-core items.
 
 MEAL LOGIC
 - Coffee/breakfast stops: 08:30–10:00 only.
@@ -68,23 +161,30 @@ ADDITIONAL USER DETAILS
 ${additionalDetails}`;
 };
 
-const ensureTimelineRanges = (
+const scheduleTimeline = (
   timeline: TimelineItem[],
   criteria: PlannerCriteria,
   selectedRecommendations: SelectedRecommendation[],
 ): TimelineItem[] => {
   const selectedById = new Map(selectedRecommendations.map((item) => [item.id, item]));
   const windowEnd = timeToMinutes(criteria.endTime);
+  let cursor = timeToMinutes(criteria.startTime);
+  let previous: SelectedRecommendation | null = null;
 
-  return timeline.map((item) => {
-    if (item.time.includes("-")) return item;
-
-    const match = item.time.match(/(\d{1,2}):(\d{2})/);
+  return timeline.flatMap((item) => {
     const selected = selectedById.get(item.recommendationId);
-    if (!match || !selected) return item;
+    if (!selected) return [];
 
-    const start = Number(match[1]) * 60 + Number(match[2]);
+    cursor += getTravelBuffer(previous, selected);
+    cursor = getAnchoredStart(cursor, selected, criteria);
+    if (cursor >= windowEnd) return [];
+
+    const start = cursor;
     const end = Math.min(windowEnd, start + selected.durationMinutes);
+    if (end - start < 15) return [];
+
+    cursor = end;
+    previous = selected;
 
     return {
       ...item,
@@ -147,8 +247,18 @@ export const createItineraryPlan = async (
       return fallback;
     }
 
-    const timeline = ensureTimelineRanges(
-      parsed.timeline.filter((item) => selectedIds.has(item.recommendationId)),
+    const selectedOrder = new Map(
+      selectedRecommendations.map((item, index) => [item.id, index]),
+    );
+    const orderedTimeline = parsed.timeline
+      .filter((item) => selectedIds.has(item.recommendationId))
+      .sort(
+        (a, b) =>
+          (selectedOrder.get(a.recommendationId) ?? 999) -
+          (selectedOrder.get(b.recommendationId) ?? 999),
+      );
+    const timeline = scheduleTimeline(
+      orderedTimeline,
       criteria,
       selectedRecommendations,
     );

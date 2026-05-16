@@ -7,16 +7,15 @@ export const createRoadmapIcon = (
   isActive: boolean,
   isSelected: boolean,
 ) => {
-  const size = isActive || isSelected ? 44 : 36;
+  const size = isActive ? 34 : 28;
   const background = isActive ? "#F4B24A" : "#2F8FA3";
   const border = isSelected ? "#F4B24A" : "#F6F2EA";
   const color = isActive ? "#111512" : "#F6F2EA";
 
   return L.divIcon({
     className: "visit-split-marker",
-    html: `<span style="background:${background};border-color:${border};color:${color};width:${size}px;height:${size}px;font-size:${isActive ? 17 : 15}px;font-weight:800">${order}</span>`,
+    html: `<span style="background:${background};border-color:${border};color:${color};width:${size}px;height:${size}px;font-size:${isActive ? 15 : 13}px;font-weight:800">${order}</span>`,
     iconSize: [size, size],
-    iconAnchor: [size / 2, size],
-    popupAnchor: [0, -size],
+    iconAnchor: [size / 2, size / 2],
   });
 };

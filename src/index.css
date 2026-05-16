@@ -51,9 +51,9 @@ input {
 
 .visit-split-marker span {
   align-items: center;
-  border: 3px solid #f6f2ea;
+  border: 2px solid #f6f2ea;
   border-radius: 999px;
-  box-shadow: 0 14px 28px rgba(17, 21, 18, 0.22);
+  box-shadow: 0 10px 22px rgba(17, 21, 18, 0.2);
   color: #111512;
   display: flex;
   justify-content: center;
